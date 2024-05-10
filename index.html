@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Clock with Rive Animation</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+        }
+        canvas {
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+    <script src="https://unpkg.com/@rive-app/canvas@2.10.3"></script>
+</head>
+<body>
+    <canvas id="riveCanvas" width="500" height="500"></canvas>
+    <script>
+        let riveInstance, secondsInput, minutesInput, hoursInput;
+
+        function updateClockInputs() {
+            const now = new Date(); // Get the current time including milliseconds
+            let hours = now.getHours() + now.getMinutes() / 60; // Extract hours
+            let minutes = now.getMinutes() + now.getSeconds() / 60; // Extract minutes
+            let seconds = now.getSeconds() + now.getMilliseconds() / 1000; // Calculate total seconds including milliseconds
+
+            // Set the Rive 'Hours', 'Minutes', and 'Seconds' inputs to the current time values
+            if (hoursInput) {
+                hoursInput.value = hours;
+            }
+            if (minutesInput) {
+                minutesInput.value = minutes;
+            }
+            if (secondsInput) {
+                secondsInput.value = seconds; // This now includes milliseconds for smoother movement
+            }
+        }
+
+        riveInstance = new rive.Rive({
+            src: 'clock.riv', // Ensure this URL is correct
+            canvas: document.getElementById('riveCanvas'),
+            autoplay: true,
+            stateMachines: 'State Machine 1', // The name of your state machine
+            onLoad: () => {
+                // Get the inputs via the name of the state machine
+                const inputs = riveInstance.stateMachineInputs('State Machine 1');
+                // Find the 'Hours', 'Minutes', and 'Seconds' inputs
+                hoursInput = inputs.find(i => i.name === 'Hours');
+                minutesInput = inputs.find(i => i.name === 'Minutes');
+                secondsInput = inputs.find(i => i.name === 'Seconds');
+                riveInstance.resizeDrawingSurfaceToCanvas();
+                
+                // Start updating the clock inputs every 50 milliseconds
+                setInterval(updateClockInputs, 50);
+                updateClockInputs(); // Update immediately on load
+            }
+        });
+    </script>
+</body>
+</html>
